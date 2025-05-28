@@ -27,8 +27,6 @@ private:
         InputResult type;
     };
 
-    
-    
     int selectedDifficulty;
     bool debug;
     bool delay;
@@ -37,6 +35,7 @@ private:
     std::vector<std::string> chosenWords;
     std::string correctWord;
     std::vector<std::string> cheats;
+    std::vector<TriedWord> triedWords;
 
     char grid[GRID_WIDTH][GRID_HEIGHT];
 
@@ -44,20 +43,20 @@ private:
 
 
     int selectDifficulty();
-    void setup_hack(int diff);
-    void populateWords(std::vector<std::string>& words, int chosenLength);
-    std::string chooseWords(std::vector<std::string>& words, std::vector<std::string>& chosenWords, int numWords);
-    void interlaceWords(std::vector<std::string>& chosenWords, int wordLength);
+    void setup_hack();
+    void populateWords();
+    std::string chooseWords(int numWords);
+    void interlaceWords();
     void fillChars();
     void findCheats();
-    void drawGrid(bool useDelay, int startHex, int allowedAttempts);
-    void drawPrompts(std::vector<TriedWord>& triedWords, int chosenLength);
-    InputResult detect_input(std::vector<std::string>& chosenWords, std::string& input,
-                                std::vector<TriedWord>& triedWords);
-    bool removeDud(std::vector<std::string>& chosenWords, const std::string& correctWord);
+    void drawGrid(bool firstDraw, int startHex, int allowedAttempts);
+    void drawPrompts();
+    InputResult detect_input(std::string& input);
+    bool removeDud();
     int likeness(const std::string& word1, const std::string& word2);
     void delay_printf(bool useDelay, const char* format, ...);
-    void displaySuccess(int chosenLength);
+    void displayStartup();
+    void displaySuccess();
     void displayFailure();
     void displayError(const std::string& message);
     

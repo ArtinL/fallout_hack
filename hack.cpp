@@ -76,9 +76,9 @@ void HackGame::setup_hack()
 
     std::random_shuffle(chosenWords.begin(), chosenWords.end());
 
-    for (int i = 0; i < 36; i++)
+    for (int i = 0; i < GRID_WIDTH; i++)
     {
-        for (int j = 0; j < 16; j++)
+        for (int j = 0; j < GRID_HEIGHT; j++)
         {
             grid[i][j] = ' ';
         }
@@ -113,16 +113,11 @@ int HackGame::hack()
         triedWord.word = word;
 
         if (result == REMOVE_DUD)
-        {
-            if (!removeDud())
-            {
-                result = REPLENISH_TRIES;
-            }
-        }
-        if (result == REPLENISH_TRIES)
-        {
-            allowedAttempts = 4;
-        }
+            if (!removeDud()) result = REPLENISH_TRIES;
+            
+        
+        if (result == REPLENISH_TRIES) allowedAttempts = 4;
+        
         triedWord.type = result;
 
         triedWord.likeness = likeness(word, correctWord);
@@ -151,7 +146,7 @@ int HackGame::hack()
     }
 }
 
-// Updated selectDifficulty to be a private method that doesn't need a delay parameter
+
 int HackGame::selectDifficulty()
 {
     int selectedDifficulty = -1;
@@ -270,7 +265,7 @@ std::string HackGame::chooseWords(int numWords)
 
 void HackGame::interlaceWords()
 {
-    int gridSize = 36 * 16;
+    int gridSize = GRID_WIDTH * GRID_HEIGHT;
     int numWords = chosenWords.size();
     int totalSpacing = gridSize - numWords * chosenLength;
     int minSpacing = totalSpacing / numWords;
@@ -283,7 +278,7 @@ void HackGame::interlaceWords()
 
         for (int j = 0; j < chosenLength; j++)
         {
-            grid[pos / 16][pos % 16] = word[j];
+            grid[pos / GRID_HEIGHT][pos % GRID_HEIGHT] = word[j];
             pos++;
         }
 
@@ -295,9 +290,9 @@ void HackGame::interlaceWords()
 void HackGame::fillChars()
 {
     int numSpecialChars = sizeof(specialChars) / sizeof(specialChars[0]);
-    for (int i = 0; i < 36; i++)
+    for (int i = 0; i < GRID_WIDTH; i++)
     {
-        for (int j = 0; j < 16; j++)
+        for (int j = 0; j < GRID_HEIGHT; j++)
         {
             if (!std::isalpha(grid[i][j]))
             {
@@ -356,7 +351,7 @@ void HackGame::findCheats()
             continue;
         }
 
-        while (end <= gridLimit && end - begin < 16 && !std::isalpha(grid[0][end]))
+        while (end <= gridLimit && end - begin < 12 && !std::isalpha(grid[0][end]))
         {
 
             char c = grid[0][end];
@@ -407,14 +402,14 @@ void HackGame::drawGrid(bool firstDraw, int startHex, int allowedAttempts)
     }
     delay_printf(firstDraw, "\n");
 
-    for (int i = 0; i < 36; i++)
+    for (int i = 0; i < GRID_WIDTH; i++)
     {
         int row = (i % 18) + 8;
         int col = (i < 18) ? 0 : 25;
 
         printf("\033[%d;%dH", row, col);
-        delay_printf(firstDraw, "0x%04X ", startHex + i * 16);
-        for (int j = 0; j < 16; j++)
+        delay_printf(firstDraw, "0x%04X ", startHex + i * GRID_HEIGHT);
+        for (int j = 0; j < GRID_HEIGHT; j++)
         {
             delay_printf(firstDraw && (j % 5 == 0), "%c", grid[i][j]);
         }
@@ -487,10 +482,8 @@ InputResult HackGame::detect_input(std::string &input)
     std::transform(input.begin(), input.end(), input.begin(), ::toupper);
 
     // check if input is empty
-    if (input.empty())
-    {
-        return ERROR;
-    }
+    if (input.empty()) return ERROR;
+
 
     bool hasSpecialChar = false;
 
@@ -511,11 +504,7 @@ InputResult HackGame::detect_input(std::string &input)
             {
 
                 auto it = std::find(cheats.begin(), cheats.end(), cheat);
-                if (it != cheats.end())
-                {
-                    cheats.erase(it);
-                }
-
+                if (it != cheats.end()) cheats.erase(it);
                 return rand() % 4 == 0 ? REPLENISH_TRIES : REMOVE_DUD;
             }
         }
@@ -524,18 +513,14 @@ InputResult HackGame::detect_input(std::string &input)
     {
         for (const auto &tried : triedWords)
         {
-            if (tried.word == input)
-            {
-                return ERROR;
-            }
+            if (tried.word == input) return ERROR;
+            
         }
 
         for (const auto &word : chosenWords)
         {
-            if (word == input)
-            {
-                return VALID_WORD;
-            }
+            if (word == input) return VALID_WORD;
+            
         }
     }
 
@@ -544,10 +529,8 @@ InputResult HackGame::detect_input(std::string &input)
 
 bool HackGame::removeDud()
 {
-    if (chosenWords.size() == 1)
-    {
-        return false;
-    }
+    if (chosenWords.size() == 1) return false;
+    
 
     int randomIndex;
     std::string word;
@@ -560,9 +543,9 @@ bool HackGame::removeDud()
 
     chosenWords.erase(chosenWords.begin() + randomIndex);
 
-    for (int i = 0; i < 36; i++)
+    for (int i = 0; i < GRID_WIDTH; i++)
     {
-        for (int j = 0; j < 16; j++)
+        for (int j = 0; j < GRID_HEIGHT; j++)
         {
             if (strncmp(&grid[i][j], word.c_str(), word.length()) == 0)
             {
@@ -583,9 +566,8 @@ int HackGame::likeness(const std::string &word1, const std::string &word2)
     for (size_t i = 0; i < word1.length() && i < word2.length(); i++)
     {
         if (word1[i] == word2[i])
-        {
             count++;
-        }
+        
     }
     return count;
 }

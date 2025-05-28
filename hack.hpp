@@ -41,6 +41,10 @@ private:
 
     std::string errormsg;
 
+    int mX, mY; // Coordinates in matrix
+    int sX, sY; // Coordinates in screen
+
+
 
     int selectDifficulty();
     void setup_hack();
